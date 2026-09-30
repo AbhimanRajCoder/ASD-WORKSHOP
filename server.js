@@ -5,10 +5,29 @@ const path = require('path');
 
 const filepath = path.join(__dirname,"db.json");
 
-app.get("/products", async (req, res) => {
+async function readFile() {
   try {
     const data = await fs.readFile(filepath, "utf-8");
-    const products = JSON.parse(data);
+    return JSON.parse(data);
+  } catch (err) {
+    console.error("Error reading file:", err);
+    throw err;
+  }
+}
+
+
+async function readFilewithDelay(){
+    await new Promise((resolve,reject)=>{
+        setTimeout(resolve,1500);
+    })
+    let products = await readFile();
+    return products;
+}
+
+
+app.get("/products", async (req, res) => {
+  try {
+    const products = await readFilewithDelay();
     res.json(products);
   } catch (error) {
     res.status(500).json({
@@ -19,8 +38,7 @@ app.get("/products", async (req, res) => {
 
 app.get("/products/:id", async (req, res) => {
   try {
-    const data = await fs.readFile(filepath, "utf-8");
-    const products = JSON.parse(data);
+    const products = await readFilewithDelay();
 
     const id = Number(req.params.id);
 
