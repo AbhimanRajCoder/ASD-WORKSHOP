@@ -1,14 +1,17 @@
 const fs = require("fs");
 const express = require("express");
 const app = express();
+const path = require('path');
+
+const filepath = path.join(__dirname,"db.json");
 
 app.get("/products", (req, res) => {
-const data = fs.readFileSync("db.json","utf-8")
+const data = fs.readFileSync(filepath,"utf-8")
 res.json(data);
 });
 
 app.get("/products/:id", (req, res) => {
-  const data = fs.readFileSync("db.json", "utf-8");
+  const data = fs.readFileSync(filepath, "utf-8");
 
   const products = JSON.parse(data);
 
