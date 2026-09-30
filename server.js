@@ -7,6 +7,23 @@ const data = fs.readFileSync("db.json","utf-8")
 res.json(data);
 });
 
+app.get("/products/:id", (req, res) => {
+  const data = fs.readFileSync("db.json", "utf-8");
+
+  const products = JSON.parse(data);
+
+  const id = Number(req.params.id);
+
+  const product = products.find((p) => p.id === id);
+
+  if (!product) {
+    return res.status(404).json({
+      error: "Product not found"
+    });
+  }
+
+  res.json(product);
+});
 
 
 
