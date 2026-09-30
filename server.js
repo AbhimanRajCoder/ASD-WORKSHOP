@@ -5,6 +5,8 @@ const path = require('path');
 
 const filepath = path.join(__dirname,"db.json");
 
+const cache = {};
+
 async function readFile() {
   try {
     const data = await fs.readFile(filepath, "utf-8");
@@ -27,8 +29,15 @@ async function readFilewithDelay(){
 
 app.get("/products", async (req, res) => {
   try {
+    let key=req.url;
+    let value=cache[key];
+    if(value){
+        return res.json(value);
+    }
     const products = await readFilewithDelay();
+    cache[key]= await readFilewithDelay();
     res.json(products);
+
   } catch (error) {
     res.status(500).json({
       error: "Failed to read products"
@@ -38,11 +47,20 @@ app.get("/products", async (req, res) => {
 
 app.get("/products/:id", async (req, res) => {
   try {
+
+    let key=req.url;
+    let value=cache[key];
+    if(value){
+        return res.json(value);
+    }
+
     const products = await readFilewithDelay();
 
     const id = Number(req.params.id);
 
     const product = products.find((p) => p.id === id);
+
+    cache[key]= product;
 
     if (!product) {
       return res.status(404).json({
