@@ -1,9 +1,8 @@
-const productModel = require("../models/productModel");
+const productService = require("../services/productService");
 
 async function getProducts(req, res) {
   try {
-    const key = req.url;
-    const products = await productModel.getAllProducts(key);
+    const products = await productService.getAllProducts();
     res.json(products);
   } catch (error) {
     res.status(500).json({ error: "Failed to read products" });
@@ -12,10 +11,8 @@ async function getProducts(req, res) {
 
 async function getProductById(req, res) {
   try {
-    const key = req.url;
     const id = Number(req.params.id);
-
-    const product = await productModel.getProductById(id, key);
+    const product = await productService.getProductById(id);
 
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
@@ -23,11 +20,69 @@ async function getProductById(req, res) {
 
     res.json(product);
   } catch (error) {
-    res.status(500).json({ error: "Failed to read products" });
+    res.status(500).json({ error: "Failed to read product" });
+  }
+}
+
+async function createProduct(req, res) {
+  try {
+    const newProduct = await productService.createProduct(req.body);
+    res.status(201).json(newProduct);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create product" });
+  }
+}
+
+async function updateProduct(req, res) {
+  try {
+    const id = Number(req.params.id);
+    const updatedProduct = await productService.updateProduct(id, req.body);
+
+    if (!updatedProduct) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.json(updatedProduct);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update product" });
+  }
+}
+
+async function patchProduct(req, res) {
+  try {
+    const id = Number(req.params.id);
+    const patchedProduct = await productService.patchProduct(id, req.body);
+
+    if (!patchedProduct) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.json(patchedProduct);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to patch product" });
+  }
+}
+
+async function deleteProduct(req, res) {
+  try {
+    const id = Number(req.params.id);
+    const deleted = await productService.deleteProduct(id);
+
+    if (!deleted) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete product" });
   }
 }
 
 module.exports = {
   getProducts,
-  getProductById
+  getProductById,
+  createProduct,
+  updateProduct,
+  patchProduct,
+  deleteProduct
 };
