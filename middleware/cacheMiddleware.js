@@ -1,4 +1,5 @@
 const cache = {};
+const TTL_MS = 60 * 1000; // 1 minute Time-To-Live in milliseconds
 
 function clearCache() {
   for (const key in cache) {
@@ -9,10 +10,16 @@ function clearCache() {
 function cacheMiddleware(req, res, next) {
   if (req.method === "GET") {
     const key = req.originalUrl || req.url;
+    const now = Date.now();
 
     if (cache[key]) {
-      res.setHeader("X-Cache", "HIT");
-      return res.json(cache[key].data);
+      const isExpired = now - cache[key].timestamp > TTL_MS;
+      if (!isExpired) {
+        res.setHeader("X-Cache", "HIT");
+        return res.json(cache[key].data);
+      }
+      // Expired cache entry: remove it
+      delete cache[key];
     }
 
     res.setHeader("X-Cache", "MISS");
@@ -60,5 +67,6 @@ function cacheMiddleware(req, res, next) {
 module.exports = {
   cacheMiddleware,
   clearCache,
-  cache
+  cache,
+  TTL_MS
 };
